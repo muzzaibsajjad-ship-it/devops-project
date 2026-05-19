@@ -4,11 +4,6 @@ pipeline {
         DOCKER_HUB_USER = "muzzaib"
     }
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/muzzaibsajjad-ship-it/devops-project.git'
-            }
-        }
         stage('Install Dependencies') {
             steps {
                 sh 'cd frontend && npm install'
