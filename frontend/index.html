@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DevOps Project - BSE-8B</title>
+  <style>
+    body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding: 50px; }
+    h1 { color: #00d4ff; }
+    .card { background: #16213e; padding: 20px; margin: 20px auto; width: 400px; border-radius: 10px; }
+    .status { color: #00ff88; font-weight: bold; }
+    button { background: #00d4ff; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>DevOps Project - BSE-8B</h1>
+  <div class="card">
+    <h2>3-Tier Application</h2>
+    <p>Status: <span class="status">LIVE</span></p>
+    <p>CI/CD Pipeline: <span class="status">Jenkins</span></p>
+    <p>Orchestration: <span class="status">Kubernetes</span></p>
+    <p>Monitoring: <span class="status">Prometheus + Grafana</span></p>
+  </div>
+  <div class="card" id="data">
+    <h3>Backend Data:</h3>
+    <div id="items">Loading...</div>
+  </div>
+  <script>
+    fetch('/api/items')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('items').innerHTML =
+          data.map(i => '<p>' + i.name + ': <span style="color:#00ff88">' + i.status + '</span></p>').join('');
+      })
+      .catch(() => {
+        document.getElementById('items').innerHTML = '<p>Backend connecting...</p>';
+      });
+  </script>
+</body>
+</html>
+< v2 -->
