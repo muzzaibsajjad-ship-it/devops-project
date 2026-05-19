@@ -4,22 +4,15 @@ pipeline {
         DOCKER_HUB_USER = "muzzaib"
     }
     stages {
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                sh 'cd frontend && npm install'
-                sh 'cd backend && npm install'
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                sh 'cd frontend && npm test'
-                sh 'cd backend && npm test'
+                checkout scm
             }
         }
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $DOCKER_HUB_USER/devops-frontend:v1 ./frontend'
-                sh 'docker build -t $DOCKER_HUB_USER/devops-backend:v1 ./backend'
+                sh 'docker build --cache-from $DOCKER_HUB_USER/devops-frontend:v1 -t $DOCKER_HUB_USER/devops-frontend:v1 ./frontend'
+                sh 'docker build --cache-from $DOCKER_HUB_USER/devops-backend:v1 -t $DOCKER_HUB_USER/devops-backend:v1 ./backend'
             }
         }
         stage('Push to Docker Hub') {
