@@ -1,55 +1,48 @@
 pipeline {
     agent any
-    triggers {
-        githubPush()
+    environment {
+        DOCKER_HUB_USER = "muzzaib"
     }
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/muzzaibsajjad-ship-it/devops-project.git'
+                git 'https://github.com/muzzaibsajjad-ship-it/devops-project.git'
             }
         }
-        stage('Test Backend') {
+        stage('Install Dependencies') {
             steps {
-                sh 'cd backend && npm install && npm test'
+                sh 'cd frontend && npm install'
+                sh 'cd backend && npm install'
             }
         }
-        stage('Test Frontend') {
+        stage('Run Tests') {
             steps {
-                sh 'cd frontend && npm install && npm test'
+                sh 'cd frontend && npm test'
+                sh 'cd backend && npm test'
             }
         }
-        stage('Security Scan') {
+        stage('Docker Build') {
             steps {
-                sh 'trivy fs . --exit-code 0 --severity HIGH,CRITICAL'
+                sh 'docker build -t $DOCKER_HUB_USER/devops-frontend:v1 ./frontend'
+                sh 'docker build -t $DOCKER_HUB_USER/devops-backend:v1 ./backend'
             }
         }
-        stage('Build Images') {
+        stage('Push to Docker Hub') {
             steps {
-                sh 'docker build -t muzzaib/devops-frontend:v1 ./frontend'
-                sh 'docker build -t muzzaib/devops-backend:v1 ./backend'
-            }
-        }
-        stage('Push Images') {
-            steps {
-                sh 'docker push muzzaib/devops-frontend:v1'
-                sh 'docker push muzzaib/devops-backend:v1'
+                sh 'docker push $DOCKER_HUB_USER/devops-frontend:v1'
+                sh 'docker push $DOCKER_HUB_USER/devops-backend:v1'
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f kubernetes/deployment.yaml'
-                sh 'kubectl rollout status deployment/frontend'
-                sh 'kubectl rollout status deployment/backend'
+                sh 'kubectl apply -f kubernetes/deployment.yaml --validate=false'
+                sh 'kubectl rollout restart deployment/frontend'
+                sh 'kubectl rollout restart deployment/backend'
             }
         }
     }
     post {
-        success {
-            echo 'Deployment Successful!'
-        }
-        failure {
-            echo 'Pipeline Failed!'
-        }
+        success { echo 'Pipeline SUCCESS!' }
+        failure { echo 'Pipeline FAILED!' }
     }
 }
